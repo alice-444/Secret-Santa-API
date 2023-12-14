@@ -21,7 +21,7 @@ Objectif : The API should enable users to register, create groups, and secretly 
 - 🚫 Good error handling and data validation
 - 📄 API documentation / Postman Collection
 ## Optional Bonuses :
-✅ Implement unit tests
-🌍 Deploy the API on a server (Heroku, AWS, etc.)
-Create an interface for group administration (view members, delete groups, etc.).
+- ✅ Implement unit tests
+- 🌍 Deploy the API on a server (Heroku, AWS, etc.)
+- Create an interface for group administration (view members, delete groups, etc.).
 
