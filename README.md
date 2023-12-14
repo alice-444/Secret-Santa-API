@@ -1,4 +1,4 @@
-#API - Secret Santa
+# API - Secret Santa
 ## Features to Implement :
 ### 1.User Registration and Authentification
 - User account creation with authentification.
