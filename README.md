@@ -1,15 +1,15 @@
 # API - Secret Santa
-Objectif : The API should enable users to register, create groups, and secretly assign people to each group member.
+**Objectif** : The API should enable users to register, create groups, and secretly assign people to each group member.
 ## Features to Implement :
-### 1.User Registration and Authentification
+### 1. User Registration and Authentification
 - User account creation with authentification.
 - Managing password security.
 - Implementing JWT authentification
-### 2.Creation and Management of Groups
+### 2. Creation and Management of Groups
 - Allowing users to create groups.
 - Inviting members via email.
 - Accepting or declining invitations.
-### 3.Secret Assignement of "Secret Santas"
+### 3. Secret Assignement of "Secret Santas"
 - Algorythm to randomly assign a group member to each participant.
 - Ensuring no ends up with their own name.
 ## Requirements
