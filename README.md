@@ -14,13 +14,13 @@ Objectif : The API should enable users to register, create groups, and secretly 
 - Ensuring no ends up with their own name.
 ## Requirements
 - ✔️ Git Flow or Github flow
-〰️ Comment your code
-💯 Complete README to initialize the project
-💻 Code quality and clarity
-🔒 API security
-🚫 Good error handling and data validation
-📄 API documentation / Postman Collection
-## Optional Bonuses:
+- 〰️ Comment your code
+- 💯 Complete README to initialize the project
+- 💻 Code quality and clarity
+- 🔒 API security
+- 🚫 Good error handling and data validation
+- 📄 API documentation / Postman Collection
+## Optional Bonuses :
 ✅ Implement unit tests
 🌍 Deploy the API on a server (Heroku, AWS, etc.)
 Create an interface for group administration (view members, delete groups, etc.).
