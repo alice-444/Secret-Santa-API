@@ -26,3 +26,31 @@
 - 🌍 Deploy the API on a server (Heroku, AWS, etc.)
 - Create an interface for group administration (view members, delete groups, etc.).
 
+# Secret Santa API #
+Welcome to the Secret Santa API project! This NodeJS application allows users to register, create groups, and secretly assign "Secret Santas." Follow the instructions below to set up and use the Secret Santa API.
+
+## Getting Started ##
+### Clone the Repository ###
+<git clone https://github.com/alice-444/secret-santa-api.git>
+<cd secret-santa-api>
+
+### Install Dependencies ###
+<npm install>
+
+### Set Environment Variables ###
+Create a .env file based on the provided .env.example.
+Add your configuration details, such as the database connection string and JWT secret.
+
+### Run the Application ###
+<npm start>
+
+### API Documentation ###
+Access the API documentation to understand and test the available endpoints.
+
+### Contribution Guidelines ###
+We welcome contributions to enhance the Secret Santa API! Follow these guidelines:
+- Fork the repository, create a new branch, and submit a pull request.
+- Ensure code quality, add necessary comments, and update documentation.
+- Write unit tests for any new features or changes.
+
+Thank you for contributing to the Secret Santa API project! 🎅✨
