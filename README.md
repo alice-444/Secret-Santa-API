@@ -1,6 +1,6 @@
 # API - Secret Santa
 *Application en NodeJS* -
-**Objectif** : The API should enable users to register, create groups, and secretly assign people to each group member.
+**Objectif** : The API should enable users to register, create groups, and secretly assign people to each group member. **Durée** : 1.5 jour
 ## Features to Implement :
 ### 1. User Registration and Authentification
 - User account creation with authentification.
