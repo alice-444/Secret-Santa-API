@@ -2,13 +2,17 @@ const User = require("../models/userModel.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+const { signSchema, updateSchema } = require("../validators.js");
 
 const saltRounds = 10;
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// to register - CRUD : create a new user
 exports.register = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    await signSchema.validate({ email, password });
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -21,7 +25,6 @@ exports.register = async (req, res) => {
     const newUser = new User({ email, password: hashedPassword });
     await newUser.save();
 
-    // Generate a JWT token for the newly registered user
     const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -32,9 +35,12 @@ exports.register = async (req, res) => {
   }
 };
 
+// to login
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    await signSchema.validate({ email, password });
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -47,7 +53,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-      expiresIn: "2h",
+      expiresIn: "10h",
     });
 
     res.status(200).json({ message: "Login successful", token });
@@ -56,6 +62,7 @@ exports.login = async (req, res) => {
   }
 };
 
+// CRUD : get all users
 exports.getAllUsers = async (req, res) => {
   try {
     // if (!req.user) {
@@ -70,6 +77,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+// CRUD : get one user
 exports.getUserById = async (req, res) => {
   try {
     const userId = req.params.id_user;
@@ -86,10 +94,14 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+// CRUD : update user
 exports.updateUser = async (req, res) => {
   try {
     const userId = req.params.id_user;
     const updates = req.body;
+
+    await updateSchema.validate(updates);
+
     const updatedUser = await User.findByIdAndUpdate(userId, updates, {
       new: true,
     });
@@ -106,6 +118,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+// CRUD : delete user
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id_user;
