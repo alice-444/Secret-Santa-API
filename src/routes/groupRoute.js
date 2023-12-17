@@ -3,7 +3,7 @@ const router = express.Router();
 
 const groupController = require("../controllers/groupController");
 
-// Je n'ai pas pu proteger les routes avec le jwt parce que sinon le crud du user ne marche plus
+// Je n'ai pas pu proteger les routes avec le jwt sinon mes routes ne marchent plus
 
 router.get("/all", groupController.getAllGroups);
 
