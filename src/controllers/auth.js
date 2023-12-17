@@ -45,7 +45,6 @@ exports.login = async (req, res) => {
 
     await loginSchema.validate({ email, password });
 
-    // Find the user with the provided email in the database
     const user = await User.findOne({ email });
 
     if (!user) {
