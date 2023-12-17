@@ -2,17 +2,26 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("../middlewares/jwt.js");
 
+const auth = require("../controllers/auth.js");
+
+router.route("/register").post(auth.register);
+router.route("/login").post(auth.login);
+
+// Je n'ai pas pu proteger les routes avec le jwt parce que sinon le crud du user ne marche plus
+
 const userController = require("../controllers/userController.js");
-
-// Je n'ai pas pu mettre protected avec le jwt parce que sinon le crud du user ne marche plus
-
-// // Protected with jwt.verifyToken
 router.route("/").get(userController.getAllUsers);
 
-router.route("/register").post(userController.register);
+router
+  .route("/:id_user")
+  .all(jwt.verifyToken)
+  .get(userController.getUserById)
+  .put(userController.updateUser)
+  .delete(userController.deleteUser);
 
-router.route("/login").post(userController.login);
+module.exports = router;
 
+// Swagger API routes
 /**
  * @openapi
  * tags:
@@ -34,11 +43,14 @@ router.route("/login").post(userController.login);
  *           schema:
  *             type: object
  *             properties:
+ *               username:
+ *                 type :string
  *               email:
  *                 type: string
  *               password:
  *                 type: string
  *             required:
+ *               - username
  *               - email
  *               - password
  *     responses:
@@ -165,14 +177,3 @@ router.route("/login").post(userController.login);
  *       500:
  *         description: Internal server error
  */
-router.route("/register").post(userController.register);
-
-// Protected with jwt.verifyToken
-router
-  .route("/:id_user")
-  // .all(jwt.verifyToken)
-  .get(userController.getUserById)
-  .put(userController.updateUser)
-  .delete(userController.deleteUser);
-
-module.exports = router;

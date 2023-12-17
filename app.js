@@ -4,13 +4,13 @@ const swaggerUi = require("swagger-ui-express");
 const userRoute = require("./src/routes/userRoute.js");
 const groupRoute = require("./src/routes/groupRoute.js");
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 const app = express();
 
 const swaggerSpec = require("./src/docs/swagger-config.js");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-mongoose.connect("mongodb://0.0.0.0:27017/secretSanta");
+mongoose.connect("mongodb://0.0.0.0:27017/secretSantaApi");
 
 app.use(express.urlencoded());
 app.use(express.json());

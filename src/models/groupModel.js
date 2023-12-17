@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 
-let groupSchema = new Schema({
+const groupSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
+  },
+  admin: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
   members: [
     {
@@ -13,11 +16,18 @@ let groupSchema = new Schema({
       ref: "User",
     },
   ],
-  admin: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  invitations: [
+    {
+      email: {
+        type: String,
+        required: true,
+      },
+      token: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
   secretSantaAssignments: [
     {
       giver: {

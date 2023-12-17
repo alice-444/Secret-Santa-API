@@ -1,107 +1,121 @@
+const bcrypt = require("bcrypt");
 const Group = require("../models/groupModel.js");
 const User = require("../models/userModel.js");
-const jwt = require("../middlewares/jwt.js");
+const inviteToGroupSchema = require("../validators.js");
 
-// generator of invitation tokens
-const generateInvitationToken = (groupId, email) => {
-  const secretKey = process.env.INVITATION_SECRET_KEY;
-  const payload = { groupId, email };
-  return jwt.sign(payload, secretKey, { expiresIn: "24h" });
-};
-
-// generator of password
-const generateRandomPassword = () => {
-  const length = 10;
-  const charsetRegex = /[a-zA-Z0-9]/;
-  let password = "";
-
-  for (let i = 0; i < length; i++) {
-    const randomChar = String.fromCharCode(
-      Math.floor(Math.random() * (charsetRegex.test("A") ? 26 : 10)) +
-        (charsetRegex.test("A") ? 65 : 48)
-    );
-    password += randomChar;
-  }
-
-  return password;
-};
-
-// invited member
-exports.inviteMembers = async (req, res) => {
+// Invite users to a group
+exports.inviteToGroup = async (req, res) => {
   try {
-    const groupId = req.params.id_group;
-    const { emails } = req.body;
+    const { groupId, emails } = req.body;
 
-    const existingGroup = await Group.findById(groupId);
-    if (!existingGroup) {
-      return res.status(404).json({ error: "Group not found" });
+    try {
+      await inviteToGroupSchema.validate({ groupId, emails });
+    } catch (validationError) {
+      return res.status(400).json({ message: "Invalid request data" });
     }
 
-    const userId = req.user.id;
-    if (existingGroup.admin.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ error: "Only the group admin can invite members" });
+    // Check if the user is the admin of the group
+    const group = await Group.findById(groupId);
+    if (!group || group.admin.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Permission denied" });
     }
 
-    const invitationTokens = emails.map((email) =>
-      generateInvitationToken(groupId, email)
-    );
+    for (const email of emails) {
+      // Check if the invited user is already a member of the group
+      if (group.members.includes(req.user.id)) {
+        return res
+          .status(400)
+          .json({ message: "User is already a member of the group" });
+      }
 
-    res.status(200).json({
-      message: "Invitations sent successfully",
-      tokens: invitationTokens,
-    });
+      // Generate a unique token for the invitation using bcrypt
+      const invitationToken = bcrypt.hashSync(
+        `${groupId}-${email}-${new Date().toISOString()}`,
+        10
+      );
+
+      // Add the invitation to the group
+      group.invitations.push({ email, token: invitationToken });
+    }
+
+    // Save the updated group with invitations
+    await group.save();
+
+    res.status(200).json({ message: "Invitations sent successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// accepting or refused
-exports.responseInvitation = async (req, res) => {
+// Accept an invitation and join a group
+exports.acceptInvitation = async (req, res) => {
   try {
-    const { token, acceptInvitation } = req.body;
+    const { groupId, token } = req.body;
 
-    if (!token) {
-      return res.status(400).json({ error: "Invalid token provided" });
+    // Find the group by ID
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
     }
 
-    const decodedToken = jwt.verify(token, process.env.INVITATION_SECRET_KEY);
+    // Check if the invitation exists
+    const invitation = group.invitations.find((inv) => inv.token === token);
+    if (!invitation) {
+      return res.status(404).json({ message: "Invitation not found" });
+    }
 
-    const { groupId, email } = decodedToken;
+    // Check if the user is already a member of the group
+    if (group.members.includes(req.user.id)) {
+      return res
+        .status(400)
+        .json({ message: "User is already a member of the group" });
+    }
 
-    const userId = req.user.id;
-    let invitedUser = await User.findOne({ email });
-
+    // Create a new user if not in the database
+    let invitedUser = await User.findOne({ email: invitation.email });
     if (!invitedUser) {
-      const generatedPassword = generateRandomPassword();
-      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
-
-      invitedUser = new User({ email, password: hashedPassword });
+      // Generate a password using bcrypt for the invited user
+      const generatedPassword = bcrypt.hashSync(
+        `${invitation.email}-${new Date().toISOString()}`,
+        10
+      );
+      invitedUser = new User({
+        email: invitation.email,
+        password: generatedPassword,
+      });
       await invitedUser.save();
     }
 
-    if (invitedUser.id !== userId) {
-      return res
-        .status(403)
-        .json({ error: "Invalid user or unauthorized access" });
-    }
+    // Add the user to the group members
+    group.members.push(invitedUser._id);
+    // Remove the invitation from the group
+    group.invitations = group.invitations.filter((inv) => inv.token !== token);
+    await group.save();
 
-    const existingGroup = await Group.findById(groupId);
-
-    if (!existingGroup) {
-      return res.status(404).json({ error: "Group not found" });
-    }
-
-    if (acceptInvitation) {
-      existingGroup.members.push(invitedUser);
-      await existingGroup.save();
-
-      res.status(200).json({ message: "Invitation accepted" });
-    } else {
-      res.status(200).json({ message: "Invitation declined" });
-    }
+    res.status(200).json({ message: "Invitation accepted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Decline an invitation to join a group
+exports.declineInvitation = async (req, res) => {
+  try {
+    const { groupId, token } = req.body;
+
+    // Find the group by ID
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Remove the invitation from the group
+    group.invitations = group.invitations.filter((inv) => inv.token !== token);
+    // Save the updated group without the declined invitation
+    await group.save();
+
+    res.status(200).json({ message: "Invitation declined successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
