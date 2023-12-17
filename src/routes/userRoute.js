@@ -7,7 +7,7 @@ const auth = require("../controllers/auth.js");
 router.route("/register").post(auth.register);
 router.route("/login").post(auth.login);
 
-// Je n'ai pas pu proteger les routes avec le jwt parce que sinon le crud du user ne marche plus
+// Je n'ai pas pu proteger les routes avec le jwt
 
 const userController = require("../controllers/userController.js");
 router.route("/").get(userController.getAllUsers);
