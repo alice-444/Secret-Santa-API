@@ -52,7 +52,6 @@ exports.acceptInvitation = async (req, res) => {
   try {
     const { groupId, token } = req.body;
 
-    // Find the group by ID
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
@@ -103,7 +102,6 @@ exports.declineInvitation = async (req, res) => {
   try {
     const { groupId, token } = req.body;
 
-    // Find the group by ID
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
