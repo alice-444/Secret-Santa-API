@@ -1,74 +1,50 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("../middlewares/jwt.js");
 
-const groupController = require("../controllers/groupController.js");
-const invitationController = require("../controllers/invitationController.js");
+const groupController = require("../controllers/groupController");
 
-router.route("/").post(groupController.getAllGroups);
+// Je n'ai pas pu proteger les routes avec le jwt parce que sinon le crud du user ne marche plus
 
-router.route("/").post(jwt.verifyToken, groupController.createGroup);
-
-router
-  .route("/groups/:id_group/invite")
-  .post(invitationController.inviteMembers);
-
-router.route("/invitation").post(invitationController.responseInvitation);
-
-// router
-//   .route("/groups/:id_group/assign-secret-santas")
-//   .post(groupController.assignSecretSantas);
+router.get("/all", groupController.getAllGroups);
 
 router
   .route("/:id_group")
+  .post(groupController.createGroup)
   .get(groupController.getGroupById)
   .put(groupController.updateGroup)
   .delete(groupController.deleteGroup);
 
+const invitationController = require("../controllers/invitationController.js");
+
+router.post("/invite", invitationController.inviteToGroup);
+
+router.post("/accept-invitation", invitationController.acceptInvitation);
+
+router.post("/decline-invitation", invitationController.declineInvitation);
+
+const secretSantaAssignment = require("../controllers/secretSantaAssignment.js");
+
+router.post(
+  "/secret-santa-assignment",
+  secretSantaAssignment.secretSantaAssignment
+);
+
 module.exports = router;
 
+// Swagger API routes
 /**
  * @openapi
  * tags:
  *   name: Groups
- *   description: CRUD operations for groups
+ *   description: CRUD operations for groups and invitations
  */
 
 /**
  * @openapi
- * /groups:
- *   post:
- *     summary: Create a new group
- *     description: Endpoint to create a new group.
- *     tags: [Groups]
- *     security:
- *       - BearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *             required:
- *               - name
- *     responses:
- *       201:
- *         description: Group created successfully
- *       400:
- *         description: Validation error or group name must be unique
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @openapi
- * /groups:
+ * /groups/all:
  *   get:
  *     summary: Get all groups
- *     description: Retrieve a list of all groups.
+ *     description: Endpoint to retrieve all groups.
  *     tags: [Groups]
  *     responses:
  *       200:
@@ -80,9 +56,24 @@ module.exports = router;
 /**
  * @openapi
  * /groups/{id_group}:
+ *   post:
+ *     summary: Create a new group
+ *     description: Endpoint to create a new group.
+ *     tags: [Groups]
+ *     parameters:
+ *       - in: path
+ *         name: id_group
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       201:
+ *         description: Group created successfully
+ *       500:
+ *         description: Internal server error
  *   get:
  *     summary: Get group by ID
- *     description: Retrieve a group by its ID.
+ *     description: Endpoint to retrieve a group by ID.
  *     tags: [Groups]
  *     parameters:
  *       - in: path
@@ -99,7 +90,7 @@ module.exports = router;
  *         description: Internal server error
  *   put:
  *     summary: Update group by ID
- *     description: Endpoint to update a group by its ID.
+ *     description: Endpoint to update a group by ID.
  *     tags: [Groups]
  *     parameters:
  *       - in: path
@@ -107,29 +98,16 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *             required:
- *               - name
  *     responses:
  *       200:
  *         description: Group updated successfully
- *       400:
- *         description: Validation error or group name must be unique
  *       404:
  *         description: Group not found
  *       500:
  *         description: Internal server error
  *   delete:
  *     summary: Delete group by ID
- *     description: Endpoint to delete a group by its ID.
+ *     description: Endpoint to delete a group by ID.
  *     tags: [Groups]
  *     parameters:
  *       - in: path
@@ -148,71 +126,72 @@ module.exports = router;
 
 /**
  * @openapi
- * /groups/{id_group}/invite:
+ * /groups/invite:
  *   post:
- *     summary: Invite members to a group
- *     description: Endpoint to invite members to a group.
+ *     summary: Invite user to a group
+ *     description: Endpoint to invite a user to a group.
  *     tags: [Groups]
- *     parameters:
- *       - in: path
- *         name: id_group
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               emails:
- *                 type: array
- *                 items:
- *                   type: string
- *             required:
- *               - emails
  *     responses:
  *       200:
- *         description: Invitations sent successfully
- *       403:
- *         description: Only the group admin can invite members
- *       404:
- *         description: Group not found
+ *         description: Invitation sent successfully
  *       500:
  *         description: Internal server error
  */
 
 /**
  * @openapi
- * /groups/invitation:
+ * /groups/accept-invitation:
  *   post:
- *     summary: Respond to a group invitation
- *     description: Endpoint to respond to a group invitation.
+ *     summary: Accept group invitation
+ *     description: Endpoint to accept a group invitation.
  *     tags: [Groups]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               token:
- *                 type: string
- *               acceptInvitation:
- *                 type: boolean
- *             required:
- *               - token
- *               - acceptInvitation
  *     responses:
  *       200:
- *         description: Invitation accepted or declined
- *       400:
- *         description: Invalid token provided
- *       403:
- *         description: Invalid user or unauthorized access
+ *         description: Invitation accepted successfully
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @openapi
+ * /groups/decline-invitation:
+ *   post:
+ *     summary: Decline group invitation
+ *     description: Endpoint to decline a group invitation.
+ *     tags: [Groups]
+ *     responses:
+ *       200:
+ *         description: Invitation declined successfully
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @openapi
+ * /groups/secret-santa-assignment:
+ *   post:
+ *     summary: Perform Secret Santa assignment for a group
+ *     description: Endpoint to perform Secret Santa assignment for the members of a group.
+ *     tags: [Groups]
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         description: Group ID for which Secret Santa assignment needs to be performed.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             groupId:
+ *               type: string
+ *           required:
+ *             - groupId
+ *     responses:
+ *       200:
+ *         description: Secret Santa assignments completed successfully
  *       404:
  *         description: Group not found
+ *       400:
+ *         description: Not enough members for Secret Santa
  *       500:
  *         description: Internal server error
  */
