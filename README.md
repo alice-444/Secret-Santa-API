@@ -32,17 +32,17 @@ Welcome to the Secret Santa API project! This NodeJS application allows users to
 ## Getting Started ##
 ### Clone the Repository ###
 <https://github.com/alice-444/Secret-Santa-API.git>
-<cd secret-santa-api>
+`cd secret-santa-api`
 
 ### Install Dependencies ###
-<npm install>
+`npm install`
 
 ### Set Environment Variables ###
 Create a .env file based on the provided .env.example.
 Add your configuration details, such as the database connection string and JWT secret.
 
 ### Run the Application ###
-<npm start>
+`npm start`
 
 ### API Documentation ###
 Access the API documentation to understand and test the available endpoints.
