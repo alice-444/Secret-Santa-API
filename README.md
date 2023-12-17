@@ -31,7 +31,7 @@ Welcome to the Secret Santa API project! This NodeJS application allows users to
 
 ## Getting Started ##
 ### Clone the Repository ###
-<https://github.com/alice-444/Secret-Santa-API.git>
+(https://github.com/alice-444/Secret-Santa-API.git)
 `cd secret-santa-api`
 
 ### Install Dependencies ###
